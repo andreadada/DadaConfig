@@ -14,10 +14,6 @@ import java.util.stream.Collectors;
 public class ConfigSection extends YamlConfiguration {
 
 
-
-    public interface ConfigurationWriter<T> { void write(ConfigSection configuration, String path, T object);}
-    public interface ConfigurationReader<T> { Optional<T> read(ConfigSection configuration, String path, Parameters parameters);}
-
     private static final Map<Class<?>, ConfigurationWriter<?>> writers = new HashMap<>();
     private static final Map<Class<?>, ConfigurationReader<?>> readers = new HashMap<>();
 
@@ -83,6 +79,13 @@ public class ConfigSection extends YamlConfiguration {
             return Optional.of(particle);
         });
 
+
+    }
+
+    public static <T> void register(Class<T> clazz, ConfigurationParser<T> parser){
+
+        readers.put(clazz, parser);
+        writers.put(clazz, parser);
 
     }
 
