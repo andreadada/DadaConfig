@@ -51,7 +51,6 @@ public abstract class Version {
 
         Optional<VersionInstancer> opt = versions.stream().filter(ver -> ver.version.matcher(version).find()).findFirst();
         opt.ifPresentOrElse(ver->{
-            LOGGER.info("Hooked to nms " + ver.classPath);
             try {
                 instance = (Version) ver.classPath.getDeclaredConstructor().newInstance();
             } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
@@ -59,7 +58,6 @@ public abstract class Version {
             }
         }, ()->{
             instance = new VersionDefault();
-            LOGGER.info("Hooked to default versioning, could probably break");
         });
 
     }

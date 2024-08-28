@@ -4,7 +4,7 @@ package me.mrbast.dadaconfig.logic;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Vehicle;
+import org.bukkit.util.Vector;
 
 
 import java.util.*;
@@ -23,7 +23,7 @@ public class ConfigSection extends YamlConfiguration {
         readers.put(Character.class, (sect, path, parameters)->Optional.of(Objects.requireNonNull(sect.getString(path)).charAt(0)));
         readers.put(UUID.class, (sect, path, parameters)-> Optional.of(UUID.fromString(Objects.requireNonNull(sect.getString(path)))));
         readers.put(Material.class, (sect, path, parameters)-> Optional.ofNullable(Material.getMaterial(Objects.requireNonNull(sect.getString(path)))));
-        readers.put(org.bukkit.util.Vector.class, (ConfigurationReader<org.bukkit.util.Vector>) (configuration, path, parameters) -> {
+        readers.put(Vector.class, (ConfigurationReader<org.bukkit.util.Vector>) (configuration, path, parameters) -> {
             String val = configuration.getString(path == null ? "" : path);
             if(val == null) return Optional.empty();
             String[] split = val.split(" ");
