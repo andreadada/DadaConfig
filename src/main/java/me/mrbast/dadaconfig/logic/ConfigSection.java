@@ -43,9 +43,6 @@ public class ConfigSection extends YamlConfiguration {
             }catch (ClassCastException e){
                 z = Integer.parseInt(split[2]);
             }
-
-            System.out.println(x + " " + y + " " + z);
-
             return Optional.of(new org.bukkit.util.Vector(x.doubleValue(), y.doubleValue(), z.doubleValue()));
         });
         writers.put(org.bukkit.util.Vector.class, (ConfigurationWriter<org.bukkit.util.Vector>) (configuration, path, vector) -> {
