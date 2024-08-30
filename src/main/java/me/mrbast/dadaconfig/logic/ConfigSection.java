@@ -27,7 +27,26 @@ public class ConfigSection extends YamlConfiguration {
             String val = configuration.getString(path == null ? "" : path);
             if(val == null) return Optional.empty();
             String[] split = val.split(" ");
-            return Optional.of(new org.bukkit.util.Vector(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2])));
+            Number x,y,z;
+            try{
+                x = Double.parseDouble(split[0]);
+            }catch (ClassCastException e){
+                x = Integer.parseInt(split[0]);
+            }
+            try{
+                y = Double.parseDouble(split[1]);
+            }catch (ClassCastException e){
+                y = Integer.parseInt(split[1]);
+            }
+            try{
+                z = Double.parseDouble(split[2]);
+            }catch (ClassCastException e){
+                z = Integer.parseInt(split[2]);
+            }
+
+            System.out.println(x + " " + y + " " + z);
+
+            return Optional.of(new org.bukkit.util.Vector(x.doubleValue(), y.doubleValue(), z.doubleValue()));
         });
         writers.put(org.bukkit.util.Vector.class, (ConfigurationWriter<org.bukkit.util.Vector>) (configuration, path, vector) -> {
             configuration.set(path == null ? "" : path, vector.getX() + " " + vector.getY() + " " + vector.getZ());
@@ -116,7 +135,8 @@ public class ConfigSection extends YamlConfiguration {
 
     protected Optional<Long> readLong(String path) {return read(Long.class, path);}
     public Optional<Location> readLocation(String path) {return read(Location.class, path);}
-    public Optional<Double> readDouble(String path) {return read(Double.class, path);}
+    public Optional<Double> readDouble(String path) {if(!contains(path)) return Optional.empty(); return Optional.of(this.getDouble(path));}
+    public Optional<Number> readNumber(String path) {if(!contains(path)) return Optional.empty(); return Optional.of(this.get(path) instanceof Number ? (Number) Objects.requireNonNull(this.get(path)) : 0);}
     public Optional<Boolean> readBoolean(String path) {return read(Boolean.class, path);}
     public Optional<Float> readFloat(String path) {if(!contains(path)) return Optional.empty(); return Optional.of((float) this.getDouble(path)); }
     public Optional<String> readString(String path) throws CouldNotReadException{return read(String.class, path);}
