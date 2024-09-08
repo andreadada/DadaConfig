@@ -180,6 +180,7 @@ public abstract class Config extends ConfigSection {
     }
     public boolean initDirectory(String filePath, boolean loadDefault, Consumer<RuntimeConfig> config){
 
+        System.out.println("WOWOWWOWOO");
         File fil = new File(Version.getPlugin().getDataFolder(), filePath);
 
         if(!fil.exists()){
@@ -187,8 +188,20 @@ public abstract class Config extends ConfigSection {
             fil.mkdir();
         }
 
-        if(!loadDefault) return true;
 
+        System.out.println(getAllSubFiles(fil));
+        getAllSubFiles(fil).forEach(x->{
+            System.out.println("FILE: " + x);
+            try {
+                new RuntimeConfig(x, config).load();
+            } catch (IOException | InvalidConfigurationException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        if(!loadDefault) {
+            return true;
+        }
         File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
         if(jarFile.isFile()) {
             try {
@@ -213,14 +226,16 @@ public abstract class Config extends ConfigSection {
                         }
                         out.close();
                         in.close();
+
+                        try{
+                            new RuntimeConfig(outFile, config).load();
+                        }catch (Exception e){
+                            Bukkit.getServer().getLogger().warning("Error while loading file : " + outFile);
+                            e.printStackTrace();
+                        }
                     }
 
-                    try{
-                        new RuntimeConfig(outFile, config).load();
-                    }catch (Exception e){
-                        Bukkit.getServer().getLogger().warning("Error while loading file : " + outFile);
-                        e.printStackTrace();
-                    }
+
 
 
                 }
