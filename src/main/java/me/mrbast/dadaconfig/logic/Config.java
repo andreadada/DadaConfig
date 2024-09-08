@@ -180,7 +180,6 @@ public abstract class Config extends ConfigSection {
     }
     public boolean initDirectory(String filePath, boolean loadDefault, Consumer<RuntimeConfig> config){
 
-        System.out.println("WOWOWWOWOO");
         File fil = new File(Version.getPlugin().getDataFolder(), filePath);
 
         if(!fil.exists()){
@@ -188,10 +187,7 @@ public abstract class Config extends ConfigSection {
             fil.mkdir();
         }
 
-
-        System.out.println(getAllSubFiles(fil));
         getAllSubFiles(fil).forEach(x->{
-            System.out.println("FILE: " + x);
             try {
                 new RuntimeConfig(x, config).load();
             } catch (IOException | InvalidConfigurationException e) {
