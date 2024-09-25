@@ -185,6 +185,52 @@ public abstract class Config extends ConfigSection {
         if(!fil.exists()){
             fil.getParentFile().mkdirs();
             fil.mkdir();
+
+            if(loadDefault){
+                File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
+                if(jarFile.isFile()) {
+                    try {
+                        JarFile jar = new JarFile(jarFile);
+                        Enumeration<JarEntry> entries = jar.entries();
+                        while(entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String name = entry.getName();
+                            if(!name.startsWith(filePath+"/")) continue;
+                            InputStream in = getClass().getResourceAsStream("/" + name);
+                            File outFile = new File(Version.getPlugin().getDataFolder(), name);
+                            if(outFile.isDirectory()) continue;
+
+                            if(!outFile.exists()){
+                                outFile.getParentFile().mkdirs();
+                                outFile.createNewFile();
+                                OutputStream out = new FileOutputStream(outFile);
+                                byte[] buffer = new byte[1024];
+                                int length;
+                                while ((length = in.read(buffer)) != -1) {
+                                    out.write(buffer, 0, length);
+                                }
+                                out.close();
+                                in.close();
+
+                                try{
+                                    new RuntimeConfig(outFile, config).load();
+                                }catch (Exception e){
+                                    Bukkit.getServer().getLogger().warning("Error while loading file : " + outFile);
+                                    e.printStackTrace();
+                                }
+                            }
+
+
+
+
+                        }
+                        jar.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return true;
         }
 
         getAllSubFiles(fil).forEach(x->{
@@ -194,52 +240,6 @@ public abstract class Config extends ConfigSection {
                 throw new RuntimeException(e);
             }
         });
-
-        if(!loadDefault) {
-            return true;
-        }
-        File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
-        if(jarFile.isFile()) {
-            try {
-                JarFile jar = new JarFile(jarFile);
-                Enumeration<JarEntry> entries = jar.entries();
-                while(entries.hasMoreElements()) {
-                    JarEntry entry = entries.nextElement();
-                    String name = entry.getName();
-                    if(!name.startsWith(filePath+"/")) continue;
-                    InputStream in = getClass().getResourceAsStream("/" + name);
-                    File outFile = new File(Version.getPlugin().getDataFolder(), name);
-                    if(outFile.isDirectory()) continue;
-
-                    if(!outFile.exists()){
-                        outFile.getParentFile().mkdirs();
-                        outFile.createNewFile();
-                        OutputStream out = new FileOutputStream(outFile);
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = in.read(buffer)) != -1) {
-                            out.write(buffer, 0, length);
-                        }
-                        out.close();
-                        in.close();
-
-                        try{
-                            new RuntimeConfig(outFile, config).load();
-                        }catch (Exception e){
-                            Bukkit.getServer().getLogger().warning("Error while loading file : " + outFile);
-                            e.printStackTrace();
-                        }
-                    }
-
-
-
-
-                }
-                jar.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         return true;
     }
