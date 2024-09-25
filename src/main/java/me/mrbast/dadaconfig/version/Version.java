@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-
 public abstract class Version {
 
     private static Plugin plugin;
