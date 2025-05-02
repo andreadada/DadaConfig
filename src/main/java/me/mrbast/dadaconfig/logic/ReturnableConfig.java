@@ -9,7 +9,7 @@ public abstract class ReturnableConfig<T> extends ConfigSection{
 
     public abstract CompletableFuture<T> loadAsync();
     public abstract T load();
-    public abstract CompletableFuture<T> saveAsync();
-    public abstract T save();
+    public abstract CompletableFuture<Void> saveAsync(T object);
+    public abstract void save(T object);
 
 }
