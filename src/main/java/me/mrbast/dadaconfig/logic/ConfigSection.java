@@ -176,13 +176,13 @@ public class ConfigSection extends YamlConfiguration {
 
 
 
-    public Collection<IncConfigSection> getNodes(){
+    public Collection<IncConfigSection> getNodes() throws RuntimeException{
         Set<String> set = new LinkedHashSet<>(this.getKeys(false));
         //Debugger.log(Debugger.HIGH, "nodes: " + this.getName() + " has " + set);
         return set.stream().map(this::getSectionUnchecked).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public Collection<IncConfigSection> getNodes(Predicate<String> filter){
+    public Collection<IncConfigSection> getNodes(Predicate<String> filter) throws RuntimeException{
         Set<String> set = this.getKeys(false).stream().filter(filter).collect(Collectors.toCollection(LinkedHashSet::new));
         //Debugger.log(Debugger.HIGH, "nodes: " + this.getName() + " has " + set);
         return set.stream().map(this::getSectionUnchecked).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -192,8 +192,10 @@ public class ConfigSection extends YamlConfiguration {
         return new IncConfigSection(this.getConfigurationSection(section));
     }
 
-    public IncConfigSection getSectionUnchecked(String section){
-        return new IncConfigSection(this.getConfigurationSection(section));
+    public IncConfigSection getSectionUnchecked(String section) throws RuntimeException{
+        ConfigurationSection x = this.getConfigurationSection(section);
+        if(x == null) throw new RuntimeException(section + " is not a section");
+        return new IncConfigSection(x);
 
     }
 
