@@ -23,6 +23,7 @@ public class ConfigSection extends YamlConfiguration {
         readers.put(Character.class, (sect, path, parameters)->Optional.of(Objects.requireNonNull(sect.getString(path)).charAt(0)));
         readers.put(UUID.class, (sect, path, parameters)-> Optional.of(UUID.fromString(Objects.requireNonNull(sect.getString(path)))));
         readers.put(Material.class, (sect, path, parameters)-> Optional.ofNullable(Material.getMaterial(Objects.requireNonNull(sect.getString(path != null ? path : "")))));
+
         readers.put(Vector.class, (ConfigurationReader<org.bukkit.util.Vector>) (configuration, path, parameters) -> {
             String val = configuration.getString(path == null ? "" : path);
             if(val == null) return Optional.empty();
@@ -94,6 +95,7 @@ public class ConfigSection extends YamlConfiguration {
 
             return Optional.of(particle);
         });
+
 
 
     }
@@ -177,7 +179,7 @@ public class ConfigSection extends YamlConfiguration {
 
 
     public Collection<IncConfigSection> getNodes() throws RuntimeException{
-        Set<String> set = new LinkedHashSet<>(this.getKeys(false));
+        Set<String> set = new LinkedHashSet<>(this.getKeys(false)).stream().filter(this::isConfigurationSection).collect(Collectors.toSet());
         //Debugger.log(Debugger.HIGH, "nodes: " + this.getName() + " has " + set);
         return set.stream().map(this::getSectionUnchecked).collect(Collectors.toCollection(LinkedHashSet::new));
     }
