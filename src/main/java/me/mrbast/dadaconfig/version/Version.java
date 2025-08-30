@@ -49,15 +49,16 @@ public abstract class Version {
         String version = Bukkit.getServer().getBukkitVersion();
 
         Optional<VersionInstancer> opt = versions.stream().filter(ver -> ver.version.matcher(version).find()).findFirst();
-        opt.ifPresentOrElse(ver->{
+
+        if(!opt.isPresent()){
+            instance = new VersionDefault();
+        }else{
             try {
-                instance = (Version) ver.classPath.getDeclaredConstructor().newInstance();
+                instance = (Version) opt.get().classPath.getDeclaredConstructor().newInstance();
             } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
-        }, ()->{
-            instance = new VersionDefault();
-        });
+        }
 
     }
 

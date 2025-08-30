@@ -4,6 +4,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Version1718 extends Version{
@@ -11,12 +12,12 @@ public class Version1718 extends Version{
 
     @Override
     public List<String> getComments(ConfigurationSection configSection, @NotNull String path) {
-        return List.of();
+        return new ArrayList<>();
     }
 
     @Override
     public List<String> getInlineComments(ConfigurationSection configSection, @NotNull String path) {
-        return List.of();
+        return new ArrayList<>();
     }
 
     @Override

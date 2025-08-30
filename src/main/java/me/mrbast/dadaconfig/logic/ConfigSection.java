@@ -57,7 +57,7 @@ public class ConfigSection extends YamlConfiguration {
             Optional<Float> yaw_ = sect.readFloat("yaw");
             Optional<Float> pitch_ = sect.readFloat("pitch");
 
-            if(world_.isEmpty() || x_.isEmpty() || y_.isEmpty() || z_.isEmpty()){
+            if(!world_.isPresent() || !x_.isPresent() || !y_.isPresent() || !z_.isPresent()){
                 return Optional.empty();
             }
 
@@ -86,7 +86,7 @@ public class ConfigSection extends YamlConfiguration {
             try{
 
                 Optional<String> optParticle = sect.read(String.class, path);
-                if(optParticle.isEmpty()){ return Optional.empty(); }
+                if(!optParticle.isPresent()){ return Optional.empty(); }
 
                 particle = Particle.valueOf(optParticle.get());
             }catch (Exception e){
@@ -168,7 +168,7 @@ public class ConfigSection extends YamlConfiguration {
     public <T, U> Optional<T> read(Class<U> converter, Class<T> clazz ) throws CouldNotReadException{
 
         Optional<U> val = getReader(converter).read(this, null, null);
-        if(val.isEmpty()){return Optional.empty();}
+        if(!val.isPresent()){return Optional.empty();}
         if(clazz.isAssignableFrom(val.get().getClass())){
             T value = clazz.cast(val.get());
             return Optional.of(value);
