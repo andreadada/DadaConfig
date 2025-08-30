@@ -7,6 +7,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,47 +46,7 @@ public abstract class Config extends ConfigSection {
         return true;
     }
 
-    public boolean initDirectory(String filePath){
 
-        File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
-        File fil = new File(Version.getPlugin().getDataFolder(), filePath);
-        if(!fil.exists()){
-            fil.getParentFile().mkdirs();
-            fil.mkdir();
-        }
-        if(jarFile.isFile()) {
-            try {
-                JarFile jar = new JarFile(jarFile);
-                Enumeration<JarEntry> entries = jar.entries();
-                while(entries.hasMoreElements()) {
-                    JarEntry entry = entries.nextElement();
-                    String name = entry.getName();
-                    if(!name.startsWith(filePath+"/")) continue;
-                    InputStream in = getClass().getResourceAsStream("/" + name);
-                    File outFile = new File(Version.getPlugin().getDataFolder(), name);
-                    if(outFile.isDirectory()) continue;
-
-                    if(!outFile.exists()){
-                        outFile.getParentFile().mkdirs();
-                        outFile.createNewFile();
-                        OutputStream out = new FileOutputStream(outFile);
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = in.read(buffer)) != -1) {
-                            out.write(buffer, 0, length);
-                        }
-                        out.close();
-                        in.close();
-                    }
-                }
-                jar.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return true;
-    }
 
     public List<File> getAllSubFiles(File directory) {
         List<File> fileList = new ArrayList<>();
@@ -132,6 +93,101 @@ public abstract class Config extends ConfigSection {
         });
     }
 
+    public Collection<File> getDefaultFiles(String filePath, File jarFile){
+
+        List<File> fileList = new ArrayList<>();
+
+        if(jarFile.isFile()) {
+            try {
+                JarFile jar = new JarFile(jarFile);
+                Enumeration<JarEntry> entries = jar.entries();
+                while(entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    String name = entry.getName();
+                    if(!name.startsWith(filePath+"/")) continue;
+                    InputStream in = getClass().getResourceAsStream("/" + name);
+                    File outFile = new File(Version.getPlugin().getDataFolder(), name);
+                    if (entry.isDirectory()) {
+                        if (!outFile.exists()) {
+                            outFile.mkdirs();
+                        }
+                        continue;
+                    }
+                    if(outFile.isDirectory()) continue;
+
+                    if(!outFile.exists()){
+                        outFile.getParentFile().mkdirs();
+                        outFile.createNewFile();
+                        OutputStream out = new FileOutputStream(outFile);
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, length);
+                        }
+                        out.close();
+                        in.close();
+                    }
+
+                    fileList.add(outFile);
+                }
+                jar.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return fileList;
+    }
+
+    public boolean initDirectory(String filePath){
+
+        File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
+        File fil = new File(Version.getPlugin().getDataFolder(), filePath);
+        if(!fil.exists()){
+            fil.getParentFile().mkdirs();
+            fil.mkdir();
+        }
+
+
+        Collection<File> files = getDefaultFiles(filePath, jarFile);
+
+
+        /*
+        if(jarFile.isFile()) {
+            try {
+                JarFile jar = new JarFile(jarFile);
+                Enumeration<JarEntry> entries = jar.entries();
+                while(entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    String name = entry.getName();
+                    if(!name.startsWith(filePath+"/")) continue;
+                    InputStream in = getClass().getResourceAsStream("/" + name);
+                    File outFile = new File(Version.getPlugin().getDataFolder(), name);
+                    if(outFile.isDirectory()) continue;
+
+                    if(!outFile.exists()){
+                        outFile.getParentFile().mkdirs();
+                        outFile.createNewFile();
+                        OutputStream out = new FileOutputStream(outFile);
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, length);
+                        }
+                        out.close();
+                        in.close();
+                    }
+                }
+                jar.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+         */
+
+        return true;
+    }
 
     public boolean initDirectory(String filePath, Consumer<File> fileConsumer){
         File fil = new File(Version.getPlugin().getDataFolder(), filePath);
@@ -140,7 +196,11 @@ public abstract class Config extends ConfigSection {
             fil.mkdir();
         }
 
+
         File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
+        getDefaultFiles(filePath, jarFile).forEach(fileConsumer);
+        /*
+
         if(jarFile.isFile()) {
             try {
                 JarFile jar = new JarFile(jarFile);
@@ -175,6 +235,8 @@ public abstract class Config extends ConfigSection {
             }
         }
 
+
+         */
         return true;
 
     }
@@ -188,7 +250,14 @@ public abstract class Config extends ConfigSection {
 
             if(loadDefault){
                 File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
-                if(jarFile.isFile()) {
+                getDefaultFiles(filePath, jarFile).forEach(x->{
+                    try {
+                        new RuntimeConfig(x, config).load();
+                    } catch (IOException | InvalidConfigurationException e) {
+                        Bukkit.getServer().getLogger().severe("Error while loading file");
+                    }
+                });
+                /*if(jarFile.isFile()) {
                     try {
                         JarFile jar = new JarFile(jarFile);
                         Enumeration<JarEntry> entries = jar.entries();
@@ -228,7 +297,11 @@ public abstract class Config extends ConfigSection {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
+
                 }
+
+                 */
             }
             return true;
         }
